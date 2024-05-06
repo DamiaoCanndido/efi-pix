@@ -32,7 +32,16 @@ axios({
   },
 }).then((response) => {
   const accessToken = response.data?.access_token;
-  const endpoint = `${process.env.EFI_URL}/v2/cob`;
+
+  const reqEFI = axios.create({
+    baseURL: process.env.EFI_URL,
+    httpsAgent: agent,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
   const dataCob = {
     calendario: {
       expiracao: 3600,
@@ -47,14 +56,8 @@ axios({
     chave: '160126bd-136d-4c38-b408-e600b6f56a23',
     solicitacaoPagador: 'Cobrança dos serviços prestados.',
   };
-  const config = {
-    httpsAgent: agent,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-  };
-  axios
-    .post(endpoint, dataCob, config)
+
+  reqEFI
+    .post('/v2/cob', dataCob)
     .then((response) => console.log(response.data));
 });
