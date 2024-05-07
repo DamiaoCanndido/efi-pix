@@ -64,8 +64,11 @@ app.get('/', async (req, res) => {
   };
 
   const cobResponse = await reqEFI.post('/v2/cob', dataCob);
+  const qrCodeResponse = await reqEFI.get(
+    `/v2/loc/${cobResponse.data.loc.id}/qrcode`
+  );
 
-  res.send(cobResponse.data);
+  res.render('qrcode', { qrcodeImage: qrCodeResponse.data.imagemQrcode });
 });
 
 app.listen(5555, () => {
