@@ -13,11 +13,16 @@ const agent = new https.Agent({
   passphrase: '',
 });
 
-const credentials = Buffer.from(
-  `${process.env.EFI_CLIENT_ID}:${process.env.EFI_CLIENT_SECRET}`
-).toString('base64');
+type credentialsType = {
+  clientId: string;
+  clientSecret: string;
+};
 
-const authenticate = async () => {
+const authenticate = async ({ clientId, clientSecret }: credentialsType) => {
+  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString(
+    'base64'
+  );
+
   return await axios({
     method: 'POST',
     url: `${process.env.EFI_URL}/oauth/token`,
@@ -32,8 +37,11 @@ const authenticate = async () => {
   });
 };
 
-export const EFIRequest = async () => {
-  const authResponse = await authenticate();
+export const EFIRequest = async ({
+  clientId,
+  clientSecret,
+}: credentialsType) => {
+  const authResponse = await authenticate({ clientId, clientSecret });
   const accessToken = authResponse.data?.access_token;
 
   return axios.create({
