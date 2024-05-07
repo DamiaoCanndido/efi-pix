@@ -1,53 +1,16 @@
-import * as dotenv from 'dotenv';
-import express from 'express';
-import axios from 'axios';
-import https from 'https';
-import fs from 'fs';
-import path from 'path';
-
+import dotenv from 'dotenv';
 dotenv.config();
-
-const cert = fs.readFileSync(
-  path.join(__dirname, '..', 'certs', process.env.EFI_CERT!)
-);
-
-const agent = new https.Agent({
-  pfx: cert,
-  passphrase: '',
-});
-
-const credentials = Buffer.from(
-  `${process.env.EFI_CLIENT_ID}:${process.env.EFI_CLIENT_SECRET}`
-).toString('base64');
+import express from 'express';
+import { EFIRequest } from './apis/efi';
 
 const app = express();
 app.set('view engine', 'ejs');
 app.set('views', 'src/views');
 
+const reqEFIalready = EFIRequest();
+
 app.get('/', async (req, res) => {
-  const authResponse = await axios({
-    method: 'POST',
-    url: `${process.env.EFI_URL}/oauth/token`,
-    headers: {
-      Authorization: `Basic ${credentials}`,
-      'Content-Type': 'application/json',
-    },
-    httpsAgent: agent,
-    data: {
-      grant_type: 'client_credentials',
-    },
-  });
-  const accessToken = authResponse.data?.access_token;
-
-  const reqEFI = axios.create({
-    baseURL: process.env.EFI_URL,
-    httpsAgent: agent,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-  });
-
+  const reqEFI = await reqEFIalready;
   const dataCob = {
     calendario: {
       expiracao: 3600,
