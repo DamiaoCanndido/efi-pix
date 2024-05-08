@@ -4,6 +4,7 @@ import express from 'express';
 import { EFIRequest } from './apis/efi';
 
 const app = express();
+app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', 'src/views');
 
@@ -43,6 +44,11 @@ app.get('/cobrancas', async (req, res) => {
     '/v2/cob?inicio=2024-01-01T00:00:00Z&fim=2024-12-31T23:59:59Z'
   );
   return res.send(cobResponse.data);
+});
+
+app.post('/webhook(/pix)?', (req, res) => {
+  console.log(req.body);
+  return res.send('200');
 });
 
 app.listen(5555, () => {
